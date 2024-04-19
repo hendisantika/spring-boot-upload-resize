@@ -4,6 +4,7 @@ import id.my.hendisantika.springbootuploadresize.service.FileUploadService;
 import id.my.hendisantika.springbootuploadresize.service.ImageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 
 /**
  * Created by IntelliJ IDEA.
@@ -24,4 +25,8 @@ public class ImageUploadController {
     @Autowired
     private ImageService imageService;
 
+    @GetMapping("")
+    public String uploadImage() {
+        return "uploadImage";
+    }
 }
