@@ -14,3 +14,8 @@ Upload Image Page
 ![Upload Image Page](img/upload1.png "Upload Image Page")
 
 ![Upload Image Page](img/upload.png "Upload Image Page")
+
+Image Has Been resized
+
+![Image Has Been resized](img/resized.png "Image Has Been resized")
+
