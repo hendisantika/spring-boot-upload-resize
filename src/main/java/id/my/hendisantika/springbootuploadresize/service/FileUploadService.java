@@ -34,6 +34,7 @@ public class FileUploadService {
         try {
             Path path = Paths.get(imageFolder, imageFile.getOriginalFilename());
             Files.write(path, imageFile.getBytes());
+            logger.info("Image has been uploaded successfully ...");
             return path.toFile();
         } catch (IOException e) {
             logger.error(e.getMessage(), e);

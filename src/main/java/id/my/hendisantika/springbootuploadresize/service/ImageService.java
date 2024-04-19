@@ -45,6 +45,7 @@ public class ImageService {
             File newImageFile = path.toFile();
             ImageIO.write(outputImage, "jpg", newImageFile);
             outputImage.flush();
+            logger.info("Image has been resized successfully ...");
             return true;
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
