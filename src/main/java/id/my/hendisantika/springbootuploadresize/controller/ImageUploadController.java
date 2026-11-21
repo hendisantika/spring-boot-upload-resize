@@ -2,7 +2,6 @@ package id.my.hendisantika.springbootuploadresize.controller;
 
 import id.my.hendisantika.springbootuploadresize.service.FileUploadService;
 import id.my.hendisantika.springbootuploadresize.service.ImageService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,11 +24,14 @@ import java.io.File;
 @Controller
 public class ImageUploadController {
 
-    @Autowired
-    private FileUploadService fileUploadService;
+    private final FileUploadService fileUploadService;
 
-    @Autowired
-    private ImageService imageService;
+    private final ImageService imageService;
+
+    public ImageUploadController(FileUploadService fileUploadService, ImageService imageService) {
+        this.fileUploadService = fileUploadService;
+        this.imageService = imageService;
+    }
 
     @GetMapping("")
     public String uploadImage() {

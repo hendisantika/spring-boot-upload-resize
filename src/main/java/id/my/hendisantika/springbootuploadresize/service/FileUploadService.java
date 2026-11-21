@@ -1,8 +1,8 @@
 package id.my.hendisantika.springbootuploadresize.service;
 
+import id.my.hendisantika.springbootuploadresize.config.ImageProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -10,7 +10,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 /**
  * Created by IntelliJ IDEA.
@@ -25,14 +24,17 @@ import java.nio.file.Paths;
 @Service
 public class FileUploadService {
 
-    @Value("${image.folder}")
-    private String imageFolder;
+    private static final Logger logger = LoggerFactory.getLogger(FileUploadService.class);
 
-    private final Logger logger = LoggerFactory.getLogger(FileUploadService.class);
+    private final ImageProperties imageProperties;
+
+    public FileUploadService(ImageProperties imageProperties) {
+        this.imageProperties = imageProperties;
+    }
 
     public File upload(MultipartFile imageFile) {
         try {
-            Path path = Paths.get(imageFolder, imageFile.getOriginalFilename());
+            Path path = imageProperties.folder().resolve(imageFile.getOriginalFilename());
             Files.write(path, imageFile.getBytes());
             logger.info("Image has been uploaded successfully ...");
             return path.toFile();

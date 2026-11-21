@@ -1,10 +1,10 @@
 package id.my.hendisantika.springbootuploadresize.service;
 
+import id.my.hendisantika.springbootuploadresize.config.ImageProperties;
 import org.apache.commons.io.FilenameUtils;
 import org.imgscalr.Scalr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.imageio.ImageIO;
@@ -12,7 +12,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 /**
  * Created by IntelliJ IDEA.
@@ -26,22 +25,23 @@ import java.nio.file.Paths;
  */
 @Service
 public class ImageService {
-    @Value("${image.folder}")
-    private String imageFolder;
+    private static final Logger logger = LoggerFactory.getLogger(ImageService.class);
 
-    @Value("${image.size}")
-    private Integer imageSize;
+    private final ImageProperties imageProperties;
 
-    private final Logger logger = LoggerFactory.getLogger(ImageService.class);
+    public ImageService(ImageProperties imageProperties) {
+        this.imageProperties = imageProperties;
+    }
 
     public boolean resizeImage(File sourceFile) {
         try {
             BufferedImage bufferedImage = ImageIO.read(sourceFile);
+            int imageSize = imageProperties.size();
             BufferedImage outputImage = Scalr.resize(bufferedImage, imageSize);
             String newFileName = FilenameUtils.getBaseName(sourceFile.getName())
-                    + "_" + imageSize.toString() + "."
+                    + "_" + imageSize + "."
                     + FilenameUtils.getExtension(sourceFile.getName());
-            Path path = Paths.get(imageFolder, newFileName);
+            Path path = imageProperties.folder().resolve(newFileName);
             File newImageFile = path.toFile();
             ImageIO.write(outputImage, "jpg", newImageFile);
             outputImage.flush();
