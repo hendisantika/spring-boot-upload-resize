@@ -1,6 +1,7 @@
 # spring-boot-upload-resize
 
 [![Java CI with Gradle](https://github.com/hendisantika/spring-boot-upload-resize/actions/workflows/gradle.yml/badge.svg)](https://github.com/hendisantika/spring-boot-upload-resize/actions/workflows/gradle.yml)
+[![Publish Docker image to GHCR](https://github.com/hendisantika/spring-boot-upload-resize/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/hendisantika/spring-boot-upload-resize/actions/workflows/docker-publish.yml)
 ![Java](https://img.shields.io/badge/Java-25-orange?logo=openjdk)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.2-6DB33F?logo=springboot)
 ![Gradle](https://img.shields.io/badge/Gradle-9.9.1-02303A?logo=gradle)
@@ -102,11 +103,30 @@ docker build -t spring-boot-upload-resize .
 docker run -p 8080:8080 -v upload-images:/app/images -e IMAGE_SIZE=300 spring-boot-upload-resize
 ```
 
+### Pre-built image from GHCR
+
+Images are published to [GitHub Container Registry](https://github.com/hendisantika/spring-boot-upload-resize/pkgs/container/spring-boot-upload-resize)
+for `linux/amd64` and `linux/arm64`:
+
+```shell
+docker pull ghcr.io/hendisantika/spring-boot-upload-resize:latest
+docker run -p 8080:8080 -v upload-images:/app/images ghcr.io/hendisantika/spring-boot-upload-resize:latest
+```
+
+| Tag                  | Published when                         |
+|----------------------|----------------------------------------|
+| `latest`, `main`     | every push to `main`                   |
+| `sha-<short-sha>`    | every published build                  |
+| `1.2.3`, `1.2`       | pushing a git tag `v1.2.3`             |
+
 ## CI/CD & Dependency Updates
 
 - **GitHub Actions** (`.github/workflows/gradle.yml`) builds and tests the project with Temurin JDK 25 on every
   push and pull request to `main`, builds the Docker image, validates `docker-compose.yml`, and submits the
   dependency graph for Dependabot alerts.
+- **Publish Docker image** (`.github/workflows/docker-publish.yml`) builds a multi-arch image with Buildx and pushes
+  it to GHCR on pushes to `main`, `v*.*.*` tags or manual dispatch (pull requests only build, never push). Each pushed
+  image gets a signed build provenance attestation.
 - **Dependabot** (`.github/dependabot.yml`):
   - Gradle dependencies: checked daily at 05:00 Asia/Jakarta, grouped (Spring Boot, Gradle Wrapper,
     minor & patch), with a cooldown period before new releases are proposed.

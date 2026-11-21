@@ -1,7 +1,9 @@
 # syntax=docker/dockerfile:1
 
 # ---------- Build stage ----------
-FROM eclipse-temurin:25-jdk AS build
+# Build on the native runner platform: the jar is platform independent, so multi-arch builds
+# only need to emulate the (small) runtime stage
+FROM --platform=$BUILDPLATFORM eclipse-temurin:25-jdk AS build
 WORKDIR /workspace
 
 # Copy Gradle wrapper & build scripts first to leverage layer caching
