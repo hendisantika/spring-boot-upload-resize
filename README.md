@@ -1,13 +1,71 @@
 # spring-boot-upload-resize
 
-### Things todo list
+[![Java CI with Gradle](https://github.com/hendisantika/spring-boot-upload-resize/actions/workflows/gradle.yml/badge.svg)](https://github.com/hendisantika/spring-boot-upload-resize/actions/workflows/gradle.yml)
+![Java](https://img.shields.io/badge/Java-25-orange?logo=openjdk)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.2-6DB33F?logo=springboot)
+![Gradle](https://img.shields.io/badge/Gradle-9.9.1-02303A?logo=gradle)
+
+Simple Spring Boot web application to **upload an image and resize it automatically** using
+[imgscalr](https://github.com/rkalla/imgscalr). The original file and the resized copy
+(`<name>_<size>.<ext>`) are stored in a configurable folder.
+
+## Tech Stack
+
+| Component       | Version |
+|-----------------|---------|
+| Java (JDK)      | 25      |
+| Spring Boot     | 4.1.2   |
+| Gradle (Wrapper)| 9.9.1   |
+| Thymeleaf       | managed by Spring Boot |
+| imgscalr-lib    | 4.2     |
+| commons-io      | 2.22.0  |
+
+## Prerequisites
+
+- JDK 25 (the build uses a Gradle Java toolchain, so Gradle will pick up a locally installed JDK 25)
+- No Gradle installation needed — use the bundled wrapper `./gradlew`
+
+## Configuration
+
+Edit `src/main/resources/application.properties`:
+
+```properties
+spring.servlet.multipart.max-file-size=16MB
+spring.servlet.multipart.max-request-size=16MB
+# Folder where original & resized images are stored (must exist)
+image.folder=/path/to/your/Images
+# Target size (px) of the resized image
+image.size=400
+```
+
+## Things todo list
 
 1. Clone this repository: `git clone https://github.com/hendisantika/spring-boot-upload-resize.git`
 2. Navigate to the folder: `cd spring-boot-upload-resize`
-3. Run the application: `mvn clean spring-boot:run`
-4. Open your favorite browser: http://localhost:8080
+3. Set `image.folder` in `application.properties` to an existing folder
+4. Run the application: `./gradlew bootRun`
+5. Open your favorite browser: http://localhost:8080
 
-### Image Screenshots
+Other useful commands:
+
+```shell
+./gradlew build        # compile, run tests and build the jar
+./gradlew test         # run tests only
+java -jar build/libs/spring-boot-upload-resize-0.0.1-SNAPSHOT.jar
+```
+
+## CI/CD & Dependency Updates
+
+- **GitHub Actions** (`.github/workflows/gradle.yml`) builds and tests the project with Temurin JDK 25 on every
+  push and pull request to `main`, and submits the dependency graph for Dependabot alerts.
+- **Dependabot** (`.github/dependabot.yml`):
+  - Gradle dependencies: checked daily at 05:00 Asia/Jakarta, grouped (Spring Boot, Gradle Wrapper,
+    minor & patch), with a cooldown period before new releases are proposed.
+  - GitHub Actions: checked weekly and grouped into a single PR.
+  - PRs are labeled (`dependencies`, `java`, `gradle`, `github_actions`) and use conventional commit prefixes
+    (`chore(deps)`, `ci(deps)`).
+
+## Image Screenshots
 
 Upload Image Page
 
@@ -18,4 +76,3 @@ Upload Image Page
 Image Has Been resized
 
 ![Image Has Been resized](img/resized.png "Image Has Been resized")
-
