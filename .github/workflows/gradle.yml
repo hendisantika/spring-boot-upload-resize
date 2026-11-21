@@ -53,6 +53,7 @@ jobs:
     needs: build
     permissions:
       contents: read
+      security-events: write  # upload Trivy SARIF results to code scanning
 
     steps:
     - uses: actions/checkout@v7
@@ -62,6 +63,35 @@ jobs:
 
     - name: Validate docker-compose file
       run: docker compose config --quiet
+
+    # trivy-action is pinned to a commit SHA (supply-chain hardening)
+    - name: Trivy scan (report all findings as SARIF)
+      uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+      with:
+        image-ref: spring-boot-upload-resize:ci
+        scanners: vuln
+        format: sarif
+        output: trivy-results.sarif
+        severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
+
+    - name: Upload Trivy results to GitHub code scanning
+      # Fork PRs get a read-only token and cannot upload results
+      if: always() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+      uses: github/codeql-action/upload-sarif@1bd86f2fdb4b86187fa4059f16f31a3202acc9ea # v4.39.4
+      with:
+        sarif_file: trivy-results.sarif
+        category: trivy-ci
+
+    - name: Trivy gate (fail on fixable HIGH/CRITICAL)
+      uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+      with:
+        skip-setup-trivy: true  # reuse the Trivy binary installed by the previous step
+        image-ref: spring-boot-upload-resize:ci
+        scanners: vuln
+        format: table
+        severity: HIGH,CRITICAL
+        ignore-unfixed: true
+        exit-code: "1"
 
   dependency-submission:
 

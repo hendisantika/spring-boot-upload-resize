@@ -1,0 +1,54 @@
+# Re-scans the published GHCR image on a schedule, so vulnerabilities disclosed
+# after the image was built still show up in the Security tab.
+name: Trivy scan (published image)
+
+on:
+  schedule:
+    - cron: "0 22 * * 0"  # every Monday 05:00 Asia/Jakarta (Sunday 22:00 UTC)
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Image tag to scan"
+        required: false
+        default: "latest"
+
+permissions:
+  contents: read
+
+jobs:
+  scan:
+
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+
+    steps:
+    - uses: actions/checkout@v7
+
+    # trivy-action is pinned to a commit SHA (supply-chain hardening)
+    - name: Trivy scan ghcr.io image
+      uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+      with:
+        image-ref: ghcr.io/${{ github.repository }}:${{ inputs.tag || 'latest' }}
+        scanners: vuln
+        format: sarif
+        output: trivy-results.sarif
+        severity: UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL
+
+    - name: Upload Trivy results to GitHub code scanning
+      uses: github/codeql-action/upload-sarif@1bd86f2fdb4b86187fa4059f16f31a3202acc9ea # v4.39.4
+      with:
+        sarif_file: trivy-results.sarif
+        category: trivy-ghcr
+
+    - name: Show fixable HIGH/CRITICAL vulnerabilities
+      uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+      with:
+        skip-setup-trivy: true
+        image-ref: ghcr.io/${{ github.repository }}:${{ inputs.tag || 'latest' }}
+        scanners: vuln
+        format: table
+        severity: HIGH,CRITICAL
+        ignore-unfixed: true
+        exit-code: "1"
