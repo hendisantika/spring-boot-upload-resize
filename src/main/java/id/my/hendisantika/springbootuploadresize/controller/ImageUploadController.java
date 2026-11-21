@@ -1,5 +1,6 @@
 package id.my.hendisantika.springbootuploadresize.controller;
 
+import id.my.hendisantika.springbootuploadresize.exception.ImageProcessingException;
 import id.my.hendisantika.springbootuploadresize.service.FileUploadService;
 import id.my.hendisantika.springbootuploadresize.service.ImageService;
 import org.springframework.stereotype.Controller;
@@ -9,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.io.File;
+import java.nio.file.Path;
 
 /**
  * Created by IntelliJ IDEA.
@@ -33,31 +34,22 @@ public class ImageUploadController {
         this.imageService = imageService;
     }
 
-    @GetMapping("")
+    @GetMapping("/")
     public String uploadImage() {
         return "uploadImage";
     }
 
     @PostMapping("/uploadImage")
-    public String uploadImage(@RequestParam("image") MultipartFile imageFile, RedirectAttributes redirectAttributes) {
-        if (imageFile.isEmpty()) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Please choose file to upload.");
-            return "redirect:/";
+    public String uploadImage(@RequestParam(value = "image", required = false) MultipartFile imageFile,
+                              RedirectAttributes redirectAttributes) {
+        try {
+            Path original = fileUploadService.upload(imageFile);
+            Path resized = imageService.resizeImage(original);
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "File uploaded successfully and resized to " + resized.getFileName() + ".");
+        } catch (ImageProcessingException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
-
-        File file = fileUploadService.upload(imageFile);
-        if (file == null) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Upload failed.");
-            return "redirect:/";
-
-        }
-        boolean resizeResult = imageService.resizeImage(file);
-        if (!resizeResult) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Resize failed.");
-            return "redirect:/";
-        }
-
-        redirectAttributes.addFlashAttribute("successMessage", "File upload successfully.");
         return "redirect:/";
     }
 }
