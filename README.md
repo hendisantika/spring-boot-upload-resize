@@ -32,8 +32,9 @@ Edit `src/main/resources/application.properties`:
 ```properties
 spring.servlet.multipart.max-file-size=16MB
 spring.servlet.multipart.max-request-size=16MB
-# Folder where original & resized images are stored (must exist)
-image.folder=/path/to/your/Images
+# Folder where original & resized images are stored (created automatically if missing).
+# Defaults to ~/Images, override with the IMAGE_FOLDER environment variable.
+image.folder=${IMAGE_FOLDER:${user.home}/Images}
 # Target size (px) of the resized image
 image.size=400
 ```
@@ -42,7 +43,7 @@ image.size=400
 
 1. Clone this repository: `git clone https://github.com/hendisantika/spring-boot-upload-resize.git`
 2. Navigate to the folder: `cd spring-boot-upload-resize`
-3. Set `image.folder` in `application.properties` to an existing folder
+3. (Optional) Choose where images are stored: `export IMAGE_FOLDER=/path/to/your/Images` (default: `~/Images`)
 4. Run the application: `./gradlew bootRun`
 5. Open your favorite browser: http://localhost:8080
 
