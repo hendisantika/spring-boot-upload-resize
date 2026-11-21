@@ -47,6 +47,22 @@ jobs:
     # - name: Build with Gradle 8.9
     #   run: gradle build
 
+  docker:
+
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      contents: read
+
+    steps:
+    - uses: actions/checkout@v7
+
+    - name: Build Docker image
+      run: docker build --tag spring-boot-upload-resize:ci .
+
+    - name: Validate docker-compose file
+      run: docker compose config --quiet
+
   dependency-submission:
 
     runs-on: ubuntu-latest

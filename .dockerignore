@@ -1,0 +1,14 @@
+.git
+.github
+.gradle
+.idea
+build
+out
+bin
+logs
+img
+*.iml
+*.md
+.DS_Store
+Dockerfile
+docker-compose.yml

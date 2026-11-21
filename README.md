@@ -55,16 +55,44 @@ Other useful commands:
 java -jar build/libs/spring-boot-upload-resize-0.0.1-SNAPSHOT.jar
 ```
 
+## Run with Docker
+
+The project ships with a multi-stage `Dockerfile` (Temurin JDK 25 build → JRE 25 runtime, layered jar, non-root user)
+and a `docker-compose.yml`.
+
+```shell
+docker compose up -d --build   # build image & start the app on http://localhost:8080
+docker compose logs -f app     # follow logs
+docker compose down            # stop (add -v to also delete the stored images volume)
+```
+
+Uploaded & resized images are stored in the named volume `images` (mounted at `/app/images`).
+The following variables can be set in the shell or in a `.env` file:
+
+| Variable        | Default | Description                       |
+|-----------------|---------|-----------------------------------|
+| `APP_PORT`      | `8080`  | Host port mapped to the container |
+| `IMAGE_SIZE`    | `400`   | Target size (px) of resized image |
+| `MAX_FILE_SIZE` | `16MB`  | Max upload file/request size      |
+
+Without Compose:
+
+```shell
+docker build -t spring-boot-upload-resize .
+docker run -p 8080:8080 -v upload-images:/app/images -e IMAGE_SIZE=300 spring-boot-upload-resize
+```
+
 ## CI/CD & Dependency Updates
 
 - **GitHub Actions** (`.github/workflows/gradle.yml`) builds and tests the project with Temurin JDK 25 on every
-  push and pull request to `main`, and submits the dependency graph for Dependabot alerts.
+  push and pull request to `main`, builds the Docker image, validates `docker-compose.yml`, and submits the
+  dependency graph for Dependabot alerts.
 - **Dependabot** (`.github/dependabot.yml`):
   - Gradle dependencies: checked daily at 05:00 Asia/Jakarta, grouped (Spring Boot, Gradle Wrapper,
     minor & patch), with a cooldown period before new releases are proposed.
-  - GitHub Actions: checked weekly and grouped into a single PR.
-  - PRs are labeled (`dependencies`, `java`, `gradle`, `github_actions`) and use conventional commit prefixes
-    (`chore(deps)`, `ci(deps)`).
+  - GitHub Actions & Docker base images: checked weekly and grouped into a single PR per ecosystem.
+  - PRs are labeled (`dependencies`, `java`, `gradle`, `github_actions`, `docker`) and use conventional commit prefixes
+    (`chore(deps)`, `ci(deps)`, `build(deps)`).
 
 ## Image Screenshots
 

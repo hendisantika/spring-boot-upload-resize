@@ -1,0 +1,20 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: spring-boot-upload-resize:latest
+    container_name: spring-boot-upload-resize
+    ports:
+      - "${APP_PORT:-8080}:8080"
+    environment:
+      IMAGE_FOLDER: /app/images
+      IMAGE_SIZE: ${IMAGE_SIZE:-400}
+      SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE: ${MAX_FILE_SIZE:-16MB}
+      SPRING_SERVLET_MULTIPART_MAX_REQUEST_SIZE: ${MAX_FILE_SIZE:-16MB}
+    volumes:
+      - images:/app/images
+    restart: unless-stopped
+
+volumes:
+  images:

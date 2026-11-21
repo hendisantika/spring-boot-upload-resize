@@ -1,0 +1,39 @@
+# syntax=docker/dockerfile:1
+
+# ---------- Build stage ----------
+FROM eclipse-temurin:25-jdk AS build
+WORKDIR /workspace
+
+# Copy Gradle wrapper & build scripts first to leverage layer caching
+COPY gradlew settings.gradle build.gradle ./
+COPY gradle ./gradle
+RUN chmod +x gradlew && ./gradlew --no-daemon dependencies > /dev/null
+
+COPY src ./src
+# Tests are executed in CI; skip them here to keep image builds fast
+RUN ./gradlew --no-daemon bootJar -x test \
+    && cp build/libs/*-SNAPSHOT.jar application.jar \
+    && java -Djarmode=tools -jar application.jar extract --layers --launcher --destination extracted
+
+# ---------- Runtime stage ----------
+FROM eclipse-temurin:25-jre
+WORKDIR /app
+
+RUN groupadd --system spring && useradd --system --gid spring --home-dir /app spring \
+    && mkdir -p /app/images && chown -R spring:spring /app
+
+# Copy layers from least to most frequently changing
+COPY --from=build --chown=spring:spring /workspace/extracted/dependencies/ ./
+COPY --from=build --chown=spring:spring /workspace/extracted/spring-boot-loader/ ./
+COPY --from=build --chown=spring:spring /workspace/extracted/snapshot-dependencies/ ./
+COPY --from=build --chown=spring:spring /workspace/extracted/application/ ./
+
+USER spring
+
+ENV IMAGE_FOLDER=/app/images \
+    JAVA_TOOL_OPTIONS="-XX:MaxRAMPercentage=75.0 -Djava.awt.headless=true"
+
+VOLUME ["/app/images"]
+EXPOSE 8080
+
+ENTRYPOINT ["java", "org.springframework.boot.loader.launch.JarLauncher"]
