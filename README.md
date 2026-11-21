@@ -39,6 +39,24 @@ image.folder=${IMAGE_FOLDER:${user.home}/Images}
 image.size=400
 ```
 
+## Health Check
+
+[Spring Boot Actuator](https://docs.spring.io/spring-boot/reference/actuator/endpoints.html) exposes **only** the
+health endpoint (other actuator endpoints are not exposed):
+
+| Endpoint                     | Description                                                      |
+|------------------------------|------------------------------------------------------------------|
+| `/actuator/health`           | Overall status (disk space, image folder, liveness, readiness)   |
+| `/actuator/health/liveness`  | Liveness probe – is the app running?                             |
+| `/actuator/health/readiness` | Readiness probe – app ready **and** image folder writable        |
+
+A custom `imageFolder` health indicator reports `DOWN` when `image.folder` cannot be created or is not writable.
+Component details are hidden (`show-details=never`) so no file system paths are leaked.
+
+```shell
+curl http://localhost:8080/actuator/health
+```
+
 ## Things todo list
 
 1. Clone this repository: `git clone https://github.com/hendisantika/spring-boot-upload-resize.git`
@@ -67,6 +85,8 @@ docker compose down            # stop (add -v to also delete the stored images v
 ```
 
 Uploaded & resized images are stored in the named volume `images` (mounted at `/app/images`).
+Both the image (`HEALTHCHECK`) and `docker-compose.yml` (`healthcheck`) use the actuator health endpoint, so
+`docker compose ps` shows the container as `healthy` once the app is ready.
 The following variables can be set in the shell or in a `.env` file:
 
 | Variable        | Default | Description                       |

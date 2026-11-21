@@ -19,6 +19,11 @@ RUN ./gradlew --no-daemon bootJar -x test \
 FROM eclipse-temurin:25-jre
 WORKDIR /app
 
+# curl is only used by the HEALTHCHECK below
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/*
+
 RUN groupadd --system spring && useradd --system --gid spring --home-dir /app spring \
     && mkdir -p /app/images && chown -R spring:spring /app
 
@@ -35,5 +40,8 @@ ENV IMAGE_FOLDER=/app/images \
 
 VOLUME ["/app/images"]
 EXPOSE 8080
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+    CMD curl -fsS http://localhost:8080/actuator/health || exit 1
 
 ENTRYPOINT ["java", "org.springframework.boot.loader.launch.JarLauncher"]
