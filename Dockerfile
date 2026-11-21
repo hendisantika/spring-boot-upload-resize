@@ -14,7 +14,7 @@ RUN chmod +x gradlew && ./gradlew --no-daemon dependencies > /dev/null
 COPY src ./src
 # Tests are executed in CI; skip them here to keep image builds fast
 RUN ./gradlew --no-daemon bootJar -x test \
-    && cp build/libs/*-SNAPSHOT.jar application.jar \
+    && find build/libs -name '*.jar' ! -name '*-plain.jar' -exec cp {} application.jar \; \
     && java -Djarmode=tools -jar application.jar extract --layers --launcher --destination extracted
 
 # ---------- Runtime stage ----------

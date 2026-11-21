@@ -65,6 +65,7 @@ jobs:
           type=ref,event=pr
           type=semver,pattern={{version}}
           type=semver,pattern={{major}}.{{minor}}
+          type=semver,pattern={{major}}
           type=sha,format=short
         labels: |
           org.opencontainers.image.title=spring-boot-upload-resize

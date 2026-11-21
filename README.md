@@ -71,7 +71,7 @@ Other useful commands:
 ```shell
 ./gradlew build        # compile, run tests and build the jar
 ./gradlew test         # run tests only
-java -jar build/libs/spring-boot-upload-resize-0.0.1-SNAPSHOT.jar
+java -jar build/libs/spring-boot-upload-resize-1.0.0.jar
 ```
 
 ## Run with Docker
@@ -109,7 +109,7 @@ Images are published to [GitHub Container Registry](https://github.com/hendisant
 for `linux/amd64` and `linux/arm64`:
 
 ```shell
-docker pull ghcr.io/hendisantika/spring-boot-upload-resize:latest
+docker pull ghcr.io/hendisantika/spring-boot-upload-resize:latest   # or a release, e.g. :1.0.0
 docker run -p 8080:8080 -v upload-images:/app/images ghcr.io/hendisantika/spring-boot-upload-resize:latest
 ```
 
@@ -117,7 +117,7 @@ docker run -p 8080:8080 -v upload-images:/app/images ghcr.io/hendisantika/spring
 |----------------------|----------------------------------------|
 | `latest`, `main`     | every push to `main`                   |
 | `sha-<short-sha>`    | every published build                  |
-| `1.2.3`, `1.2`       | pushing a git tag `v1.2.3`             |
+| `1.2.3`, `1.2`, `1`  | pushing a git tag `v1.2.3`             |
 
 ## CI/CD & Dependency Updates
 
